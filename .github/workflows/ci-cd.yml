@@ -64,12 +64,7 @@ jobs:
       - name: Install Dependencies
         working-directory: ./frontend
         run: |
-          rm -rf node_modules package-lock.json
-          npm install
-          git add package-lock.json
-          git config --global user.email "github-actions@github.com"
-          git config --global user.name "GitHub Actions"
-          git commit -m "chore: update package-lock.json" || true
+          npm install --legacy-peer-deps
 
       - name: Run Linting
         working-directory: ./frontend

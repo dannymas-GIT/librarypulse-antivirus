@@ -14,10 +14,11 @@ export const App = () => {
             <Route path="/" element={<Navigate to="/dashboard/overview" replace />} />
             <Route element={<AppLayout />}>
               {navigationConfig.mainNav.flatMap(group =>
-                group.routes.map(route => {
+                group.routes.map((route, index) => {
                   const Component = route.component;
                   return (
                     <Route
+                      key={route.path}
                       path={route.path}
                       element={<Component />}
                     />

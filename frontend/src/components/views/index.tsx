@@ -1,6 +1,4 @@
 import React from 'react';
-import { ThreatLog } from '../dashboard/ThreatLog';
-import { SystemStatus } from '../dashboard/SystemStatus';
 import { ThreatDistribution } from '../dashboard/ThreatDistribution';
 import { DashboardOverview } from '../dashboard/Overview';
 import type { ScanHistory } from '../../types/dashboard';
@@ -52,6 +50,41 @@ export const SecurityLogsView = () => {
           </div>
         </div>
       </div>
+      <div className="mt-6">
+        <h3 className="text-lg font-semibold mb-4">Recent Security Events</h3>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr>
+                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Severity</th>
+                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {logs.map((log) => (
+                <tr key={log.id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {new Date(log.timestamp).toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize">
+                      {log.type}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize">
+                      {log.severity}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{log.message}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };
@@ -93,10 +126,8 @@ export const SystemLogsView = () => {
 // Scan Logs View
 export const ScanLogsView = () => {
   const scheduledScans = getMockScheduledScans();
-  const threatStats = getMockThreatStats();
   
   const totalThreatsFound = scheduledScans.reduce((acc, scan) => acc + (scan.statistics?.threatsFound || 0), 0);
-  const totalFilesScanned = scheduledScans.reduce((acc, scan) => acc + (scan.statistics?.filesScanned || 0), 0);
   
   const getScansWithStatus = (status: ScanHistory['status']) => 
     scheduledScans.filter(scan => scan.status === status);
@@ -173,7 +204,6 @@ export const RealTimeMonitoringView = () => {
 // Network Protection View
 export const NetworkProtectionView = () => {
   const networkStatus = getMockNetworkStatus();
-  const threatStats = getMockThreatStats();
 
   return (
     <div className="space-y-6">
@@ -206,8 +236,7 @@ export const NetworkProtectionView = () => {
 
 // Quarantine Manager View
 export const QuarantineManagerView = () => {
-  const logs = getMockThreatLogs();
-  const quarantinedItems = logs.filter(log => log.status === 'quarantined');
+  const logs = getMockThreatLogs().filter(log => log.status === 'quarantined');
 
   return (
     <div className="space-y-6">
@@ -225,7 +254,7 @@ export const QuarantineManagerView = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {quarantinedItems.map((item) => (
+              {logs.map((item) => (
                 <tr key={item.id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {new Date(item.timestamp).toLocaleString()}

@@ -1,6 +1,14 @@
 import { 
-  LayoutDashboard, Shield, FileText, Settings, AlertCircle, Database, 
-  History, Activity, Lock, Bug, Network, MonitorPlay, Zap
+  BarChart3, 
+  Shield, 
+  AlertTriangle, 
+  Activity, 
+  Network, 
+  FolderLock, 
+  Brain, 
+  Download, 
+  ClipboardCheck, 
+  MonitorCheck 
 } from 'lucide-react';
 import {
   DashboardView,

@@ -1,4 +1,10 @@
-import { ThreatStats, SystemStatus, ThreatLog, ScanHistory } from '../types/dashboard';
+import type { 
+  SystemStatus, 
+  ThreatStats, 
+  ThreatLog, 
+  PerformanceMetrics, 
+  NetworkStatus 
+} from '../types/dashboard';
 
 export const getMockThreatStats = (): ThreatStats => ({
   malware: 45,

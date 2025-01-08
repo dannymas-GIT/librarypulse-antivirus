@@ -1,0 +1,209 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18'
+  DOCKER_BUILDKIT: 1
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Run SAST Scan
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript
+          queries: security-and-quality
+          
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        
+      - name: Run Dependency Check
+        run: |
+          cd frontend
+          npm audit
+          
+      - name: Run Snyk Security Scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+
+  test-and-build:
+    needs: security-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Run Linting
+        run: |
+          cd frontend
+          npm run lint
+
+      - name: Run Tests with Coverage
+        run: |
+          cd frontend
+          npm run test:coverage
+
+      - name: Upload Coverage Reports
+        uses: codecov/codecov-action@v3
+        with:
+          directory: ./frontend/coverage
+          flags: frontend
+          name: frontend-coverage
+
+      - name: Build Application
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Cache Build
+        uses: actions/cache@v3
+        with:
+          path: frontend/dist
+          key: ${{ runner.os }}-build-${{ github.sha }}
+
+  docker-build-push:
+    needs: test-and-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build and Push
+        uses: docker/build-push-action@v4
+        with:
+          context: ./frontend
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/librarypulse-antivirus:${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/librarypulse-antivirus:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+          build-args: |
+            NODE_ENV=production
+            BUILD_VERSION=${{ github.sha }}
+
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Scan Docker Image for Vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ secrets.DOCKER_USERNAME }}/librarypulse-antivirus:${{ github.sha }}
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+  deploy:
+    needs: docker-build-push
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Deploy to Lightsail
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ${{ secrets.LIGHTSAIL_USERNAME }}
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          script: |
+            # Update deployment script
+            cd /opt/librarypulse
+            
+            # Backup current state
+            docker-compose ps > deployment.state
+            
+            # Pull the new image
+            docker-compose pull antivirus-frontend
+            
+            # Verify current deployment health
+            if curl --fail http://localhost/health; then
+              echo "Current deployment is healthy"
+            else
+              echo "Warning: Current deployment health check failed"
+            fi
+            
+            # Start new container alongside existing one
+            docker-compose up -d --no-deps --scale antivirus-frontend=2 --no-recreate antivirus-frontend
+            
+            # Wait for new container to be healthy
+            echo "Waiting for new deployment to be healthy..."
+            sleep 15
+            
+            # Verify new deployment health
+            if ! curl --fail http://localhost/health; then
+              echo "New deployment health check failed - rolling back"
+              docker-compose up -d --no-deps --scale antivirus-frontend=1 --no-recreate antivirus-frontend
+              exit 1
+            fi
+            
+            # Scale down to single container
+            docker-compose up -d --no-deps --scale antivirus-frontend=1 --no-recreate antivirus-frontend
+            
+            # Cleanup
+            docker system prune -f --volumes
+            
+            # Final health check
+            if ! curl --fail http://localhost/health; then
+              echo "Final health check failed"
+              exit 1
+            fi
+            
+            echo "Deployment completed successfully"
+
+      - name: Notify Deployment Status
+        if: always()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_MESSAGE: 'Antivirus Frontend Deployment ${{ job.status }}'
+          SLACK_TITLE: Deployment Status 

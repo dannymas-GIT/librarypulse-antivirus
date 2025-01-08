@@ -29,6 +29,7 @@ jobs:
         uses: github/codeql-action/analyze@v2
         
       - name: Run Dependency Check
+        working-directory: ./frontend
         run: |
           cd frontend
           npm audit
@@ -39,6 +40,8 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --severity-threshold=high
+          command: test
+          file: ./frontend/package.json
 
   test-and-build:
     needs: security-scan
@@ -54,18 +57,18 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install Dependencies
+        working-directory: ./frontend
         run: |
-          cd frontend
           npm ci
 
       - name: Run Linting
+        working-directory: ./frontend
         run: |
-          cd frontend
           npm run lint
 
       - name: Run Tests with Coverage
+        working-directory: ./frontend
         run: |
-          cd frontend
           npm run test:coverage
 
       - name: Upload Coverage Reports
@@ -76,8 +79,8 @@ jobs:
           name: frontend-coverage
 
       - name: Build Application
+        working-directory: ./frontend
         run: |
-          cd frontend
           npm run build
 
       - name: Cache Build

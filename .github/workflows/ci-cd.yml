@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: antivirus/frontend/package-lock.json
+          cache-dependency-path: 'frontend/package-lock.json'
       
       - name: Run SAST Scan
         uses: github/codeql-action/init@v2
@@ -35,7 +35,7 @@ jobs:
         uses: github/codeql-action/analyze@v2
         
       - name: Run Dependency Check
-        working-directory: ./antivirus/frontend
+        working-directory: ./frontend
         run: |
           npm ci
           npm audit
@@ -51,39 +51,39 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: antivirus/frontend/package-lock.json
+          cache-dependency-path: 'frontend/package-lock.json'
 
       - name: Install Dependencies
-        working-directory: ./antivirus/frontend
+        working-directory: ./frontend
         run: |
           npm ci
 
       - name: Run Linting
-        working-directory: ./antivirus/frontend
+        working-directory: ./frontend
         run: |
           npm run lint
 
       - name: Run Tests with Coverage
-        working-directory: ./antivirus/frontend
+        working-directory: ./frontend
         run: |
           npm run test:coverage
 
       - name: Upload Coverage Reports
         uses: codecov/codecov-action@v3
         with:
-          directory: ./antivirus/frontend/coverage
+          directory: ./frontend/coverage
           flags: frontend
           name: frontend-coverage
 
       - name: Build Application
-        working-directory: ./antivirus/frontend
+        working-directory: ./frontend
         run: |
           npm run build
 
       - name: Cache Build
         uses: actions/cache@v3
         with:
-          path: antivirus/frontend/dist
+          path: frontend/dist
           key: ${{ runner.os }}-build-${{ github.sha }}
 
   docker-build-push:
@@ -99,7 +99,7 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Build and Push
-        working-directory: ./antivirus/frontend
+        working-directory: ./frontend
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/librarypulse-antivirus:${{ github.sha }} .
           docker tag ${{ secrets.DOCKER_USERNAME }}/librarypulse-antivirus:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/librarypulse-antivirus:latest

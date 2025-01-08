@@ -39,9 +39,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=high
-          command: test
-          file: ./frontend/package.json
+          args: --file=./frontend/package.json --severity-threshold=high
 
   test-and-build:
     needs: security-scan

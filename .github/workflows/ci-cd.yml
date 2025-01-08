@@ -31,7 +31,6 @@ jobs:
       - name: Run Dependency Check
         working-directory: ./frontend
         run: |
-          cd frontend
           npm audit
           
       - name: Run Snyk Security Scan

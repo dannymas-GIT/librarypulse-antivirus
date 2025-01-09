@@ -2,7 +2,13 @@
 import '@testing-library/jest-dom';
 import { expect, afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
+import type { TestingLibraryMatchers } from '@testing-library/jest-dom/matchers';
 import * as matchers from '@testing-library/jest-dom/matchers';
+
+declare module 'vitest' {
+  interface Assertion<T = any> extends TestingLibraryMatchers<T, void> {}
+  interface AsymmetricMatchersContaining extends TestingLibraryMatchers<any, void> {}
+}
 
 // Mock ResizeObserver
 class ResizeObserverMock {
@@ -29,7 +35,7 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // Extend Vitest's expect method with methods from react-testing-library
-expect.extend(matchers as any);
+expect.extend(matchers);
 
 // Cleanup after each test case
 afterEach(() => {

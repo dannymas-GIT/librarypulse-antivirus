@@ -7,7 +7,7 @@ import { navigationConfig } from './config/navigation';
 export const App = () => {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50" data-testid="main-layout">
         <TopNav navigation={navigationConfig.mainNav} />
         <div className="max-w-7xl mx-auto">
           <Routes>

@@ -1,43 +1,38 @@
 export interface ThreatStats {
-  malware: number;
-  phishing: number;
-  ransomware: number;
-  spyware: number;
-  adware: number;
+  [key: string]: number;
 }
 
 export interface SystemStatus {
-  definitionVersion: string;
-  engineVersion: string;
-  lastUpdate: string;
-  nextScheduledScan: string;
   realTimeProtection: boolean;
+  lastUpdate: number;
+  engineVersion: string;
+  definitionVersion: string;
   firewallStatus: boolean;
+  nextScheduledScan: number;
 }
 
 export interface ScanHistory {
   id: string;
-  type: 'quick' | 'full' | 'custom';
-  startTime: string;
-  duration: number; // in minutes
-  filesScanned: number;
-  threatsFound: number;
-  status: 'completed' | 'failed' | 'cancelled';
-  statistics: {
+  startTime: number;
+  endTime: number;
+  status: 'completed' | 'failed' | 'in-progress';
+  type: 'full' | 'quick' | 'custom';
+  statistics?: {
+    scannedFiles: number;
     threatsFound: number;
-    filesScanned: number;
-    scanDuration: number;
+    cleanedFiles: number;
   };
 }
 
 export interface ThreatLog {
   id: string;
-  timestamp: string;
-  type: keyof ThreatStats;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  status: 'detected' | 'quarantined' | 'removed' | 'allowed';
+  timestamp: number;
+  type: 'malware' | 'ransomware' | 'phishing';
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  status: 'quarantined' | 'removed' | 'active';
   filePath: string;
   hash: string;
+  message: string;
 }
 
 export interface ResourceUsage {
@@ -52,4 +47,19 @@ export interface DailyStats {
   scansPerformed: number;
   threatsDetected: number;
   filesScanned: number;
+}
+
+export interface PerformanceMetrics {
+  cpu: number;
+  memory: number;
+  activeProcesses: number;
+  scanSpeed: number;
+}
+
+export interface NetworkStatus {
+  activeThreats: number;
+  blockedConnections: number;
+  firewallRules: number;
+  inboundConnections: number;
+  outboundConnections: number;
 } 

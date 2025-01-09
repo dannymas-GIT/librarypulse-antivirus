@@ -290,7 +290,6 @@ export const QuarantineManagerView = () => {
 // Threat Intelligence View
 export const ThreatIntelligenceView = () => {
   const threatStats = getMockThreatStats();
-  const logs = getMockThreatLogs();
 
   return (
     <div className="space-y-6">

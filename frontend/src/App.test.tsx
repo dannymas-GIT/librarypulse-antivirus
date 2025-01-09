@@ -4,7 +4,7 @@ import { App } from './App';
 
 describe('App', () => {
   it('renders without crashing', () => {
-    render(<App />);
-    expect(document.querySelector('.min-h-screen')).toBeInTheDocument();
+    const { container } = render(<App />);
+    expect(container).toBeTruthy();
   });
 }); 

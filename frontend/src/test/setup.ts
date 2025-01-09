@@ -19,7 +19,7 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // Extend Vitest's expect method with methods from react-testing-library
-expect.extend(matchers as any);
+expect.extend(matchers);
 
 // Cleanup after each test case
 afterEach(() => {

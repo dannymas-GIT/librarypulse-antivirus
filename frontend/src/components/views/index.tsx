@@ -170,9 +170,7 @@ export const ScanLogsView = () => {
 
 // Real-time Monitoring View
 export const RealTimeMonitoringView = () => {
-  const systemStatus = getMockSystemStatus();
   const performanceMetrics = getMockPerformanceMetrics();
-  const networkStatus = getMockNetworkStatus();
 
   return (
     <div className="space-y-6">

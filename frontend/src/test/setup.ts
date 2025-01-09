@@ -1,7 +1,18 @@
+/// <reference types="vitest/globals" />
+import '@testing-library/jest-dom';
 import { expect, afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
-import * as matchers from '@testing-library/jest-dom/matchers';
+import matchers from '@testing-library/jest-dom/matchers';
 import { vi } from 'vitest';
+
+// Mock ResizeObserver
+class ResizeObserverMock {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+global.ResizeObserver = ResizeObserverMock;
 
 // Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {

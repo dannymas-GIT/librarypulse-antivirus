@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  antivirus-frontend:
+    image: ${DOCKER_USERNAME}/librarypulse-antivirus:${TAG:-latest}
+    restart: unless-stopped
+    networks:
+      - antivirus-network
+      - traefik-public
+    deploy:
+      replicas: 1
+      update_config:
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    environment:
+      - NODE_ENV=production
+      - VITE_API_URL=https://api.librarypulse.com
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.antivirus.rule=Host(`antivirus.librarypulse.com`)"
+      - "traefik.http.routers.antivirus.entrypoints=websecure"
+      - "traefik.http.routers.antivirus.tls.certresolver=letsencrypt"
+      - "traefik.http.services.antivirus.loadbalancer.server.port=80"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  antivirus-network:
+    driver: overlay
+    attachable: true
+  traefik-public:
+    external: true 

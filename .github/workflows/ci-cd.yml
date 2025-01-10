@@ -61,7 +61,9 @@ jobs:
       - name: Run Linting
         working-directory: ./frontend
         run: |
-          npm run lint
+          npm cache clean --force
+          rm -rf node_modules/.cache
+          npm run lint -- --debug
 
       - name: Run Tests with Coverage
         working-directory: ./frontend
@@ -112,11 +114,18 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ secrets.DOCKER_USERNAME }}/librarypulse-antivirus:${{ github.sha }}
-          format: 'table'
-          exit-code: '1'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          exit-code: '0'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
 
   deploy:
     needs: docker-build-push

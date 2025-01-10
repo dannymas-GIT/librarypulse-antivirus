@@ -6,7 +6,12 @@ WORKDIR /app
 
 # Install dependencies first (better layer caching)
 COPY package.json package-lock.json ./
-RUN npm ci --quiet
+
+# Force clean install and verify versions
+RUN npm cache clean --force && \
+    npm install && \
+    npm ls cross-spawn path-to-regexp && \
+    npm ci --quiet
 
 # Copy source files
 COPY . .

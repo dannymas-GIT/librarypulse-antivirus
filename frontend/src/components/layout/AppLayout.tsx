@@ -3,10 +3,12 @@ import { navigationConfig } from '../../config/navigation';
 import { TopNav } from './TopNav';
 import { Breadcrumb } from './Breadcrumb';
 import type { Route, NavigationGroup } from '../../types/navigation';
+import { getMockSystemStatus } from '../../mockData';
 
 export const AppLayout = () => {
   const location = useLocation();
   const currentPath = location.pathname;
+  const mockStatus = getMockSystemStatus();
 
   const currentGroup = navigationConfig.find((group: NavigationGroup) => 
     group.routes.some((route: Route) => route.path === currentPath)
@@ -29,7 +31,11 @@ export const AppLayout = () => {
             />
           )}
           <div className="mt-4">
-            <Outlet />
+            {currentRoute ? (
+              <currentRoute.component status={mockStatus} />
+            ) : (
+              <Outlet />
+            )}
           </div>
         </div>
       </main>

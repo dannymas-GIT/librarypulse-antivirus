@@ -1,10 +1,15 @@
 import { LucideIcon } from 'lucide-react';
+import { SystemStatus } from './dashboard';
+
+export interface RouteProps {
+  status: SystemStatus;
+}
 
 export interface Route {
   path: string;
   label: string;
   icon: LucideIcon;
-  component: React.FC<Record<string, unknown>>;
+  component: React.FC<RouteProps>;
 }
 
 export interface NavigationGroup {

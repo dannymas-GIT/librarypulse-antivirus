@@ -1,4 +1,3 @@
-import React from 'react';
 import { Shield, Clock, RefreshCw, CheckCircle, XCircle } from 'lucide-react';
 import { SystemStatus as SystemStatusType } from '../../types/dashboard';
 

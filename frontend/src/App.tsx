@@ -1,34 +1,27 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { TopNav } from './components/layout/TopNav';
-import { AppLayout } from './components/layout/AppLayout';
-import { navigationConfig } from './config/navigation';
+import { DashboardOverview } from './components/dashboard/Overview';
+import { SystemStatus } from './types/dashboard';
 
-export const App = () => {
+const mockStatus: SystemStatus = {
+  status: 'healthy',
+  lastScan: new Date().toISOString(),
+  threatsDetected: 0,
+  threatsQuarantined: 0,
+  threatsRemoved: 0,
+  scanProgress: 100,
+  definitionVersion: '1.0.234',
+  engineVersion: '2.1.567',
+  lastUpdate: new Date().toISOString(),
+  nextScheduledScan: new Date().toISOString(),
+  realTimeProtection: true,
+  firewallStatus: true
+};
+
+const App = () => {
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-50" data-testid="main-layout">
-        <TopNav navigation={navigationConfig.mainNav} />
-        <div className="max-w-7xl mx-auto">
-          <Routes>
-            <Route path="/" element={<Navigate to="/dashboard/overview" replace />} />
-            <Route element={<AppLayout />}>
-              {navigationConfig.mainNav.flatMap(group =>
-                group.routes.map(route => {
-                  const Component = route.component;
-                  return (
-                    <Route
-                      key={route.path}
-                      path={route.path}
-                      element={<Component />}
-                    />
-                  );
-                })
-              )}
-            </Route>
-          </Routes>
-        </div>
-      </div>
-    </Router>
+    <div className="App">
+      <DashboardOverview status={mockStatus} />
+    </div>
   );
-}; 
+};
+
+export default App; 

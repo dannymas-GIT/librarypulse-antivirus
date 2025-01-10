@@ -1,65 +1,52 @@
-export interface ThreatStats {
-  [key: string]: number;
-}
-
 export interface SystemStatus {
-  realTimeProtection: boolean;
-  lastUpdate: number;
-  engineVersion: string;
+  status: 'healthy' | 'warning' | 'error';
+  lastScan: string;
+  threatsDetected: number;
+  threatsQuarantined: number;
+  threatsRemoved: number;
+  scanProgress?: number;
   definitionVersion: string;
+  engineVersion: string;
+  lastUpdate: string;
+  nextScheduledScan: string;
+  realTimeProtection: boolean;
   firewallStatus: boolean;
-  nextScheduledScan: number;
-}
-
-export interface ScanHistory {
-  id: string;
-  startTime: number;
-  endTime: number;
-  status: 'completed' | 'failed' | 'in-progress';
-  type: 'full' | 'quick' | 'custom';
-  statistics?: {
-    scannedFiles: number;
-    threatsFound: number;
-    cleanedFiles: number;
-  };
 }
 
 export interface ThreatLog {
   id: string;
-  timestamp: number;
-  type: 'malware' | 'ransomware' | 'phishing';
-  severity: 'critical' | 'high' | 'medium' | 'low';
+  timestamp: string;
+  type: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
   status: 'quarantined' | 'removed' | 'active';
+  message: string;
   filePath: string;
   hash: string;
-  message: string;
 }
 
-export interface ResourceUsage {
-  cpu: number;
-  memory: number;
-  disk: number;
-  timestamp: string;
+export interface ScanHistory {
+  id: string;
+  startTime: string;
+  endTime: string;
+  threatsFound: number;
+  status: 'completed' | 'failed' | 'cancelled';
+  type: 'full' | 'quick' | 'custom';
 }
 
-export interface DailyStats {
-  date: string;
-  scansPerformed: number;
-  threatsDetected: number;
-  filesScanned: number;
+export interface QuarantineItem {
+  id: string;
+  fileName: string;
+  path: string;
+  quarantinedAt: string;
+  threatType: string;
+  size: number;
+  hash: string;
 }
 
-export interface PerformanceMetrics {
-  cpu: number;
-  memory: number;
-  activeProcesses: number;
-  scanSpeed: number;
-}
-
-export interface NetworkStatus {
-  activeThreats: number;
-  blockedConnections: number;
-  firewallRules: number;
-  inboundConnections: number;
-  outboundConnections: number;
+export interface ThreatStats {
+  malware: number;
+  phishing: number;
+  ransomware: number;
+  spyware: number;
+  other: number;
 } 

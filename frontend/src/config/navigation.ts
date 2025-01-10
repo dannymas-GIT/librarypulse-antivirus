@@ -25,8 +25,9 @@ import {
   ComplianceReportView,
   ScanLogsView
 } from '../components/views';
+import type { NavigationConfig } from '../types/navigation';
 
-const mainNav = [
+export const navigationConfig: NavigationConfig = [
   {
     label: 'Dashboard',
     icon: LayoutDashboard,
@@ -123,9 +124,4 @@ const mainNav = [
       }
     ]
   }
-];
-
-export const navigationConfig = {
-  productTitle: 'Antivirus Management',
-  mainNav
-}; 
+]; 

@@ -1,47 +1,37 @@
-import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { navigationConfig } from '../../config/navigation';
+import { TopNav } from './TopNav';
+import { Breadcrumb } from './Breadcrumb';
+import type { Route, NavigationGroup } from '../../types/navigation';
 
 export const AppLayout = () => {
   const location = useLocation();
-  const pathSegments = location.pathname.split('/').filter(Boolean);
+  const currentPath = location.pathname;
 
-  // Find current route information
-  const currentGroup = navigationConfig.mainNav.find(group =>
-    group.routes.some(route => route.path.startsWith(`/${pathSegments[0]}`))
+  const currentGroup = navigationConfig.find((group: NavigationGroup) => 
+    group.routes.some((route: Route) => route.path === currentPath)
   );
-  const currentRoute = currentGroup?.routes.find(route => 
-    route.path === location.pathname
-  );
+  const currentRoute = currentGroup?.routes.find((route: Route) => route.path === currentPath);
 
   return (
-    <div>
-      {/* Breadcrumb */}
-      <div className="bg-gray-50 border-b border-gray-200">
+    <div className="min-h-screen bg-gray-50">
+      <TopNav navigation={navigationConfig} />
+      <main className="py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-4">
-            <div className="flex items-center space-x-2">
-              <span className="text-base font-bold text-gray-900">Antivirus Management</span>
-              {currentGroup && (
-                <>
-                  <span className="text-gray-400">/</span>
-                  <span className="text-base font-bold text-gray-900">{currentGroup.label}</span>
-                </>
-              )}
-              {currentRoute && (
-                <>
-                  <span className="text-gray-400">/</span>
-                  <span className="text-base font-bold text-gray-900">{currentRoute.label}</span>
-                </>
-              )}
-            </div>
+          {currentGroup && currentRoute && (
+            <Breadcrumb
+              config={{
+                items: [
+                  { label: currentGroup.label, path: currentGroup.routes[0].path },
+                  { label: currentRoute.label, path: currentRoute.path },
+                ],
+              }}
+            />
+          )}
+          <div className="mt-4">
+            <Outlet />
           </div>
         </div>
-      </div>
-
-      {/* Page content */}
-      <main className="py-6 px-4 sm:px-6 lg:px-8">
-        <Outlet />
       </main>
     </div>
   );

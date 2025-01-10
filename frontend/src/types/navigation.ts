@@ -1,22 +1,20 @@
 import { LucideIcon } from 'lucide-react';
-import { ComponentType } from 'react';
 
-export interface NavRoute {
+export interface Route {
   path: string;
   label: string;
   icon: LucideIcon;
-  component: ComponentType;
+  component: React.FC<Record<string, unknown>>;
 }
 
-export interface NavGroup {
+export interface NavigationGroup {
   label: string;
   icon: LucideIcon;
-  routes: NavRoute[];
+  routes: Route[];
 }
 
-export interface NavigationConfig {
-  productTitle: string;
-  mainNav: NavGroup[];
+export interface NavigationConfig extends Array<NavigationGroup> {
+  productTitle?: string;
 }
 
 export interface BreadcrumbItem {
@@ -26,5 +24,4 @@ export interface BreadcrumbItem {
 
 export interface BreadcrumbConfig {
   items: BreadcrumbItem[];
-  current: string;
 } 
